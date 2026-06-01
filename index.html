@@ -1,0 +1,1648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>static dreams • night one</title>
+  <style>
+    /* ===== CORE AESTHETIC: 2008-2015 SOCIAL MEDIA + CRT ===== */
+    :root {
+      --bg-deep: #0a0a0f;
+      --bg-panel: #11111a;
+      --bg-hover: #1a1a25;
+      --text-main: #c5c5d0;
+      --text-dim: #8a8a9a;
+      --link: #9d85ff;
+      --link-hover: #b8a5ff;
+      --accent: #64ffc8;
+      --error: #ff6496;
+      --crt-glow: rgba(100, 255, 200, 0.08);
+      --scanline: rgba(0, 0, 0, 0.12);
+      --font-ui: "Courier New", monospace;
+      --font-post: Georgia, serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg-deep);
+      color: var(--text-main);
+      font-family: var(--font-ui);
+      font-size: 14px;
+      line-height: 1.5;
+      overflow-x: hidden;
+      padding: 20px;
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* CRT SCANLINES + GLOW */
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0px,
+        var(--scanline) 1px,
+        transparent 2px
+      );
+      pointer-events: none;
+      z-index: 999;
+      animation: flicker 12s infinite;
+      opacity: 0.7;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      box-shadow: inset 0 0 120px var(--crt-glow);
+      pointer-events: none;
+      z-index: 998;
+      animation: glow-pulse 18s infinite;
+    }
+
+    @keyframes flicker {
+      0%, 100% { opacity: 0.7; }
+      47% { opacity: 0.85; }
+      53% { opacity: 0.6; }
+      92% { opacity: 0.75; }
+    }
+
+    @keyframes glow-pulse {
+      0%, 100% { box-shadow: inset 0 0 120px var(--crt-glow); }
+      50% { box-shadow: inset 0 0 140px rgba(100, 255, 200, 0.12); }
+    }
+
+    /* ===== LAYOUT ===== */
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 10;
+    }
+
+    header {
+      padding: 15px 0 25px;
+      border-bottom: 1px solid rgba(157, 133, 255, 0.2);
+      margin-bottom: 25px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 1.4rem;
+      font-weight: normal;
+      letter-spacing: -0.5px;
+      color: var(--accent);
+      text-shadow: 0 0 8px rgba(100, 255, 200, 0.4);
+    }
+
+    .session-info {
+      color: var(--text-dim);
+      font-size: 0.9rem;
+    }
+
+    .nav-tabs {
+      display: flex;
+      gap: 18px;
+      margin-bottom: 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      padding-bottom: 12px;
+    }
+
+    .nav-tab {
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      cursor: pointer;
+      padding: 4px 2px;
+      font-family: var(--font-ui);
+      font-size: 0.95rem;
+      position: relative;
+      transition: color 0.2s;
+    }
+
+    .nav-tab.active,
+    .nav-tab:hover {
+      color: var(--link);
+    }
+
+    .nav-tab.active::after {
+      content: "";
+      position: absolute;
+      bottom: -13px;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: var(--link);
+      box-shadow: 0 0 6px var(--link);
+    }
+
+    /* ===== FEED POSTS ===== */
+    .post {
+      background: var(--bg-panel);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 3px;
+      padding: 16px;
+      margin-bottom: 18px;
+      position: relative;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    .post:hover {
+      border-color: rgba(157, 133, 255, 0.3);
+      box-shadow: 0 0 0 1px rgba(157, 133, 255, 0.15);
+    }
+
+    .post-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 3px;
+      background: linear-gradient(135deg, #2a2a3a, #1a1a25);
+      border: 1px solid rgba(255,255,255,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+      image-rendering: pixelated;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .avatar::after {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.15), transparent 60%);
+      pointer-events: none;
+    }
+
+    .avatar.blink {
+      animation: blink-avatar 8s infinite;
+    }
+
+    @keyframes blink-avatar {
+      0%, 48%, 52%, 100% { opacity: 1; }
+      50% { opacity: 0.6; filter: blur(0.5px); }
+    }
+
+    .username {
+      font-weight: bold;
+      color: var(--link);
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .username:hover {
+      color: var(--link-hover);
+      text-shadow: 0 0 6px rgba(157, 133, 255, 0.5);
+    }
+
+    .timestamp {
+      color: var(--text-dim);
+      font-size: 0.85rem;
+      margin-left: auto;
+    }
+
+    .post-content {
+      font-family: var(--font-post);
+      margin-bottom: 12px;
+      color: var(--text-main);
+    }
+
+    .post-image {
+      width: 100%;
+      max-height: 200px;
+      object-fit: cover;
+      border-radius: 2px;
+      margin: 10px 0;
+      image-rendering: pixelated;
+      border: 1px solid rgba(255,255,255,0.08);
+      display: block;
+      background: #000;
+    }
+
+    .post-meta {
+      display: flex;
+      gap: 15px;
+      color: var(--text-dim);
+      font-size: 0.9rem;
+      border-top: 1px solid rgba(255,255,255,0.05);
+      padding-top: 10px;
+    }
+
+    .post-action {
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .post-action:hover {
+      color: var(--accent);
+    }
+
+    /* ===== NOTIFICATIONS & DMs ===== */
+    .panel {
+      background: var(--bg-panel);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 3px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+
+    .panel-title {
+      font-weight: bold;
+      margin-bottom: 12px;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .notification,
+    .dm-preview {
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .notification:last-child,
+    .dm-preview:last-child {
+      border-bottom: none;
+    }
+
+    .notification:hover,
+    .dm-preview:hover {
+      background: var(--bg-hover);
+    }
+
+    .notification.unread::before {
+      content: "•";
+      color: var(--accent);
+      margin-right: 8px;
+      font-size: 1.4rem;
+      position: relative;
+      top: 3px;
+    }
+
+    /* ===== MODALS ===== */
+    .modal {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(10, 10, 15, 0.92);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+
+    .modal.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal-content {
+      background: var(--bg-panel);
+      border: 1px solid rgba(157, 133, 255, 0.3);
+      border-radius: 4px;
+      width: 90%;
+      max-width: 500px;
+      padding: 20px;
+      position: relative;
+      box-shadow: 0 0 30px rgba(100, 133, 255, 0.15);
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 12px;
+      right: 15px;
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      font-size: 1.4rem;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .modal-close:hover {
+      color: var(--error);
+    }
+
+    .modal-title {
+      font-weight: bold;
+      margin-bottom: 15px;
+      color: var(--link);
+    }
+
+    .modal-body {
+      margin-bottom: 20px;
+      font-family: var(--font-post);
+      line-height: 1.6;
+    }
+
+    .choices {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .choice-btn {
+      background: var(--bg-hover);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: var(--text-main);
+      padding: 10px 15px;
+      border-radius: 3px;
+      cursor: pointer;
+      text-align: left;
+      font-family: var(--font-ui);
+      transition: all 0.2s;
+    }
+
+    .choice-btn:hover {
+      background: rgba(157, 133, 255, 0.15);
+      border-color: var(--link);
+      box-shadow: 0 0 0 1px var(--link);
+    }
+
+    .choice-btn:active {
+      transform: translateY(1px);
+    }
+
+    /* ===== FOOTER / END SESSION ===== */
+    .footer {
+      text-align: center;
+      padding: 30px 0 50px;
+      color: var(--text-dim);
+      font-size: 0.9rem;
+    }
+
+    .end-session {
+      background: var(--bg-hover);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: var(--text-main);
+      padding: 10px 25px;
+      border-radius: 3px;
+      cursor: pointer;
+      font-family: var(--font-ui);
+      margin-top: 15px;
+      transition: all 0.3s;
+    }
+
+    .end-session:hover {
+      background: rgba(255, 100, 150, 0.1);
+      border-color: var(--error);
+      box-shadow: 0 0 0 1px var(--error);
+    }
+
+    /* ===== PROTOTYPE OVERLAY ===== */
+    .prototype-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(10, 10, 15, 0.97);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      text-align: center;
+      padding: 40px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s;
+    }
+
+    .prototype-overlay.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .prototype-title {
+      font-size: 2.2rem;
+      color: var(--accent);
+      margin-bottom: 20px;
+      text-shadow: 0 0 15px rgba(100, 255, 200, 0.6);
+      letter-spacing: -1px;
+    }
+
+    .prototype-text {
+      max-width: 500px;
+      margin-bottom: 30px;
+      line-height: 1.7;
+      font-family: var(--font-post);
+      font-size: 1.1rem;
+    }
+
+    .prototype-note {
+      color: var(--error);
+      font-weight: bold;
+      margin: 15px 0;
+      animation: pulse-note 3s infinite;
+    }
+
+    @keyframes pulse-note {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    .prototype-footer {
+      margin-top: 25px;
+      color: var(--text-dim);
+      font-size: 0.95rem;
+    }
+
+    /* ===== SUBTLE GLITCH EFFECT (rare) ===== */
+    .glitch-text {
+      position: relative;
+      display: inline-block;
+    }
+
+    .glitch-text::before,
+    .glitch-text::after {
+      content: attr(data-text);
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .glitch-text::before {
+      left: 2px;
+      text-shadow: -2px 0 #ff00ff;
+      clip: rect(44px, 450px, 56px, 0);
+      animation: glitch-anim-1 2s infinite linear alternate-reverse;
+    }
+
+    .glitch-text::after {
+      left: -2px;
+      text-shadow: -2px 0 #00ffff;
+      clip: rect(44px, 450px, 56px, 0);
+      animation: glitch-anim-2 3s infinite linear alternate-reverse;
+    }
+
+    @keyframes glitch-anim-1 {
+      0% { clip-path: polygon(0 30px, 100% 30px, 100% 40px, 0 40px); }
+      25% { clip-path: polygon(0 12px, 100% 12px, 100% 72px, 0 72px); }
+      50% { clip-path: polygon(0 60px, 100% 60px, 100% 80px, 0 80px); }
+      75% { clip-path: polygon(0 35px, 100% 35px, 100% 80px, 0 80px); }
+      100% { clip-path: polygon(0 20px, 100% 20px, 100% 75px, 0 75px); }
+    }
+
+    @keyframes glitch-anim-2 {
+      0% { clip-path: polygon(0 15px, 100% 15px, 100% 80px, 0 80px); }
+      25% { clip-path: polygon(0 45px, 100% 45px, 100% 60px, 0 60px); }
+      50% { clip-path: polygon(0 25px, 100% 25px, 100% 75px, 0 75px); }
+      75% { clip-path: polygon(0 55px, 100% 55px, 100% 85px, 0 85px); }
+      100% { clip-path: polygon(0 40px, 100% 40px, 100% 50px, 0 50px); }
+    }
+
+    /* ===== UTILITIES ===== */
+    .hidden { display: none !important; }
+    .text-link { color: var(--link); cursor: pointer; }
+    .text-link:hover { text-decoration: underline; }
+    .dim { color: var(--text-dim); }
+    .accent { color: var(--accent); }
+    .error { color: var(--error); }
+
+    /* ===== MAIN MENU ===== */
+    .main-menu {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(135deg, rgba(10,10,15,0.98), rgba(17,17,26,0.98));
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 3000;
+      text-align: center;
+      padding: 40px;
+      opacity: 1;
+      pointer-events: all;
+      transition: opacity 0.5s;
+    }
+
+    .main-menu.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .menu-title {
+      font-size: 3.5rem;
+      color: var(--accent);
+      margin-bottom: 30px;
+      text-shadow: 0 0 20px rgba(100, 255, 200, 0.8);
+      letter-spacing: -1px;
+      animation: menu-glow 3s ease-in-out infinite;
+    }
+
+    @keyframes menu-glow {
+      0%, 100% { text-shadow: 0 0 20px rgba(100, 255, 200, 0.8); }
+      50% { text-shadow: 0 0 40px rgba(100, 255, 200, 1); }
+    }
+
+    .menu-subtitle {
+      font-size: 1.1rem;
+      color: var(--text-dim);
+      margin-bottom: 40px;
+      max-width: 400px;
+    }
+
+    .menu-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+
+    .menu-btn {
+      background: var(--bg-panel);
+      border: 2px solid var(--link);
+      color: var(--link);
+      padding: 15px 40px;
+      border-radius: 3px;
+      cursor: pointer;
+      font-family: var(--font-ui);
+      font-size: 1rem;
+      min-width: 250px;
+      transition: all 0.3s;
+      text-shadow: 0 0 6px rgba(157, 133, 255, 0.3);
+    }
+
+    .menu-btn:hover {
+      background: rgba(157, 133, 255, 0.15);
+      box-shadow: 0 0 15px var(--link);
+      transform: translateY(-2px);
+    }
+
+    .menu-footer {
+      color: var(--text-dim);
+      font-size: 0.85rem;
+      margin-top: 40px;
+    }
+
+    /* ===== INTRO OVERLAY ===== */
+    .intro-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(10, 10, 15, 0.95);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      text-align: center;
+      padding: 40px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s;
+    }
+
+    .intro-overlay.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .intro-title {
+      font-size: 2.5rem;
+      color: var(--accent);
+      margin-bottom: 25px;
+      text-shadow: 0 0 15px rgba(100, 255, 200, 0.6);
+    }
+
+    .intro-text {
+      max-width: 550px;
+      margin-bottom: 20px;
+      line-height: 1.8;
+      font-family: var(--font-post);
+      font-size: 1rem;
+      color: var(--text-main);
+    }
+
+    .intro-tips {
+      max-width: 500px;
+      background: rgba(157, 133, 255, 0.1);
+      border: 1px solid rgba(157, 133, 255, 0.2);
+      border-radius: 3px;
+      padding: 20px;
+      margin: 25px 0;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+
+    .intro-tips li {
+      margin: 8px 0;
+      color: var(--text-main);
+    }
+
+    .intro-continue {
+      background: var(--link);
+      border: none;
+      color: var(--bg-deep);
+      padding: 12px 35px;
+      border-radius: 3px;
+      cursor: pointer;
+      font-family: var(--font-ui);
+      font-weight: bold;
+      margin-top: 20px;
+      transition: all 0.3s;
+    }
+
+    .intro-continue:hover {
+      box-shadow: 0 0 15px var(--link);
+      transform: translateY(-2px);
+    }
+
+    /* ===== CHAT MESSAGES ===== */
+    .dm-message {
+      margin: 8px 0;
+      padding: 10px 12px;
+      border-radius: 3px;
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    .dm-message.from-user {
+      background: rgba(157, 133, 255, 0.15);
+      border-left: 2px solid var(--link);
+      margin-left: 30px;
+      text-align: left;
+    }
+
+    .dm-message.from-user::before {
+      content: "you";
+      display: block;
+      font-weight: bold;
+      color: var(--link);
+      font-size: 0.85rem;
+      margin-bottom: 4px;
+    }
+
+    .dm-message.from-contact {
+      background: rgba(100, 255, 200, 0.08);
+      border-left: 2px solid var(--accent);
+      margin-right: 30px;
+      text-align: left;
+    }
+
+    .dm-message.from-contact::before {
+      content: attr(data-from);
+      display: block;
+      font-weight: bold;
+      color: var(--accent);
+      font-size: 0.85rem;
+      margin-bottom: 4px;
+    }
+
+    /* ===== AUDIO TOGGLE ===== */
+    .audio-toggle {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--bg-panel);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: var(--text-dim);
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 100;
+      font-size: 1.2rem;
+      transition: all 0.2s;
+    }
+
+    .audio-toggle:hover {
+      color: var(--accent);
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px var(--crt-glow);
+    }
+
+    .audio-toggle.muted::after {
+      content: "🔇";
+    }
+
+    .audio-toggle.unmuted::after {
+      content: "🔊";
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 600px) {
+      body { padding: 15px; }
+      .post { padding: 14px; }
+      .nav-tabs { gap: 12px; font-size: 0.9rem; }
+      .logo { font-size: 1.2rem; }
+    }
+  </style>
+</head>
+<body>
+  <!-- AUDIO ELEMENTS (silent by default, user enables) -->
+  <audio id="ambient" loop>
+    <source src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=" type="audio/wav">
+  </audio>
+  <audio id="blip">
+    <source src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=" type="audio/wav">
+  </audio>
+
+  <!-- MAIN MENU -->
+  <div class="main-menu" id="main-menu">
+    <div class="menu-title">static dreams</div>
+    <div class="menu-subtitle">a dream diary for night one<br><span class="dim">where the feed bleeds into memory</span></div>
+    <div class="menu-buttons">
+      <button class="menu-btn" id="start-btn">→ start session</button>
+      <button class="menu-btn" id="about-btn">→ what is this?</button>
+    </div>
+    <div class="menu-footer">use arrow keys or click • audio recommended 🎧</div>
+  </div>
+
+  <!-- INTRO OVERLAY -->
+  <div class="intro-overlay" id="intro-overlay">
+    <div class="intro-title">welcome back</div>
+    <div class="intro-text">
+      you've been scrolling for hours. the feed has always been here, waiting. your old posts seem... different tonight.
+      <br><br>
+      explore the dreams of others. make choices. watch as reality starts to blur.
+    </div>
+    <div class="intro-tips">
+      <strong>how to play:</strong>
+      <ul>
+        <li>👤 <strong>click usernames</strong> to view profiles & make choices</li>
+        <li>✉️ <strong>open messages</strong> to reply (your choices matter)</li>
+        <li>📍 <strong>the more you scroll</strong>, the stranger things get</li>
+        <li>🔴 <strong>unread posts</strong> (red dot) contain something uncanny</li>
+      </ul>
+    </div>
+    <button class="intro-continue" id="continue-btn">→ enter the feed</button>
+  </div>
+
+  <div class="container" id="main-container" style="display: none;">
+    <header>
+      <div class="logo">static dreams</div>
+      <div class="session-info">night one • <span id="current-time">2:47 AM</span></div>
+    </header>
+
+    <nav class="nav-tabs">
+      <button class="nav-tab active" data-tab="feed">feed</button>
+      <button class="nav-tab" data-tab="notifications">notifications</button>
+      <button class="nav-tab" data-tab="dms">messages</button>
+      <button class="nav-tab" data-tab="profile">profile</button>
+    </nav>
+
+    <!-- FEED -->
+    <div id="feed" class="tab-content">
+      <!-- Posts will be injected here -->
+    </div>
+
+    <!-- NOTIFICATIONS -->
+    <div id="notifications" class="tab-content hidden">
+      <div class="panel">
+        <div class="panel-title">🔔 recent</div>
+        <div class="notification unread" data-type="dream-mention">
+          @moonlit_archive mentioned you in a dream
+        </div>
+        <div class="notification" data-type="new-follower">
+          @static_gardener started following you
+        </div>
+        <div class="notification unread" data-type="system">
+          system: your memory cache feels warm tonight
+        </div>
+        <div class="notification unread" data-type="dream-mention">
+          @memory_fragment: have we talked before?
+        </div>
+        <div class="notification unread" data-type="profile-view">
+          @the_red_room viewed your profile
+        </div>
+        <div class="notification" data-type="ad">
+          [ad] you left something in the red room. <span class="text-link">remember</span>
+        </div>
+        <div class="notification" data-type="system">
+          system: time is drifting. your unease is showing.
+        </div>
+      </div>
+    </div>
+
+    <!-- DMs -->
+    <div id="dms" class="tab-content hidden">
+      <div class="panel">
+        <div class="panel-title">✉️ messages</div>
+        <div class="dm-preview unread" data-from="dreaming_in_static">
+          <strong>@dreaming_in_static</strong>: hey. do you ever feel like the feed knows what you're going to type before you type it?
+        </div>
+        <div class="dm-preview" data-from="void.tumblr">
+          <strong>@void.tumblr</strong>: the hallway is longer tonight. just so you know.
+        </div>
+        <div class="dm-preview unread" data-from="memory_fragment">
+          <strong>@memory_fragment</strong>: sorry, we haven't actually met before, right? why does it feel like we have?
+        </div>
+        <div class="dm-preview" data-from="scrolling_backwards">
+          <strong>@scrolling_backwards</strong>: if you keep scrolling backwards, what happens when you reach your first post?
+        </div>
+      </div>
+    </div>
+
+    <!-- PROFILE -->
+    <div id="profile" class="tab-content hidden">
+      <div class="panel">
+        <div class="post-header">
+          <div class="avatar">✦</div>
+          <div>
+            <div class="username">@you</div>
+            <div class="dim">just scrolling • joined 2012</div>
+          </div>
+        </div>
+        <div class="post-content" style="font-family: var(--font-ui); margin: 15px 0;">
+          bio: [empty]<br>
+          posts: 47 • following: 89 • followers: 132
+        </div>
+        <div class="post-meta">
+          <span class="post-action">edit profile</span>
+          <span class="post-action">view archive</span>
+          <span class="post-action">settings</span>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">your recent posts</div>
+        <div class="post" style="background: var(--bg-hover); border-color: rgba(157,133,255,0.2);">
+          <div class="post-content">sometimes i wonder if my old posts are watching me scroll back through them.</div>
+          <div class="post-meta">
+            <span>3 likes</span>
+            <span>2:14 AM</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div class="dim">static dreams v0.1 • a dream diary jam prototype</div>
+      <button class="end-session" id="end-session">end session</button>
+    </div>
+  </div>
+
+  <!-- PROFILE MODAL -->
+  <div class="modal" id="profile-modal" role="dialog" aria-labelledby="modal-username" aria-hidden="true">
+    <div class="modal-content">
+      <button class="modal-close" aria-label="Close dialog">&times;</button>
+      <div class="modal-title" id="modal-username">@username</div>
+      <div class="modal-body" id="modal-bio">bio loading...</div>
+      <div class="choices" id="modal-choices">
+        <!-- choices injected here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- DM MODAL -->
+  <div class="modal" id="dm-modal" role="dialog" aria-labelledby="dm-title" aria-hidden="true">
+      <div class="modal-content" style="display: flex; flex-direction: column; max-height: 80vh;">
+        <button class="modal-close" aria-label="Close dialog">&times;</button>
+        <div class="modal-title" id="dm-title">✉️ @<span id="dm-from">user</span></div>
+        <div id="dm-thread" style="flex: 1; overflow-y: auto; margin: 15px 0; padding: 10px 0; border-top: 1px solid rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.05);">
+          <!-- conversation thread -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROTOTYPE ENDING OVERLAY -->
+  <div class="prototype-overlay" id="prototype-end">
+    <div class="prototype-title">session ended</div>
+    <div class="prototype-text">
+      thank you for visiting <strong>night one</strong>.<br><br>
+      <span class="accent">this is a prototype</span> • a brief glimpse into what's coming<br><br>
+      <div style="background: rgba(157, 133, 255, 0.1); border: 1px solid rgba(157, 133, 255, 0.2); border-radius: 3px; padding: 12px; margin: 15px 0; font-size: 0.95rem;">
+        <strong>your session:</strong><br>
+        unease level: <span id="final-unease">0</span> / 100<br>
+        profiles explored: <span id="final-profiles">0</span><br>
+        choices made: <span id="final-choices">0</span>
+      </div>
+
+      <strong>in the full game:</strong><br>
+      • multiple nights with deeper narratives<br>
+      • the feed evolves with your choices<br>
+      • reality bends. posts reference you. identities blur.<br>
+      • different endings based on your path through the dreams<br><br>
+      no jump scares. no gore. just the unsettling intimacy of a screen at 2 AM.
+    </div>
+    <div class="prototype-footer">
+      <strong>static dreams: full edition</strong> coming soon<br>
+      <span class="dim" style="margin-top:15px; display:block;">follow the dream. revisit the feed.</span>
+      <span class="dim" style="margin-top:10px; display:block;">[press any key or click to return to menu]</span>
+    </div>
+  </div>
+
+  <!-- AUDIO TOGGLE -->
+  <div class="audio-toggle unmuted" id="audio-toggle" title="toggle ambient sound"></div>
+
+  <script>
+    // ===== GAME STATE =====
+    const state = {
+      unease: 0,
+      viewedPosts: [],
+      audioEnabled: true,
+      night: 1,
+      gameStarted: false,
+      viewedProfiles: [],
+      choicesMade: []
+    };
+
+    // ===== DOM ELEMENTS =====
+    const feedEl = document.getElementById('feed');
+    const tabs = document.querySelectorAll('.nav-tab');
+    const tabContents = document.querySelectorAll('.tab-content');
+    const profileModal = document.getElementById('profile-modal');
+    const dmModal = document.getElementById('dm-modal');
+    const endSessionBtn = document.getElementById('end-session');
+    const prototypeEnd = document.getElementById('prototype-end');
+    const audioToggle = document.getElementById('audio-toggle');
+    const ambientAudio = document.getElementById('ambient');
+    const blipAudio = document.getElementById('blip');
+    const currentTimeEl = document.getElementById('current-time');
+
+    // ===== DREAM POSTS (NIGHT 1) =====
+    const posts = [
+      {
+        id: 'post0',
+        user: 'dream_archive',
+        avatar: '📚',
+        time: '11:45 PM',
+        content: 'just got back from a walk. the streets felt longer than usual. does that happen to anyone else?',
+        likes: 2,
+        comments: 1,
+        uncanny: false
+      },
+      {
+        id: 'post1',
+        user: 'moonlit_archive',
+        avatar: '🌙',
+        time: '2:14 AM',
+        content: 'does anyone else feel like their old posts are... watching them? probably just tired.',
+        likes: 3,
+        comments: 1,
+        uncanny: false
+      },
+      {
+        id: 'post2',
+        user: 'static_gardener',
+        avatar: '🌱',
+        time: '2:31 AM',
+        content: 'my dreams started buffering lately. keeps freezing on the part where the hallway has no end. anyone else?',
+        image: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="120" viewBox="0 0 200 120"><rect width="200" height="120" fill="%231a1a25"/><text x="50%" y="50%" font-family="monospace" font-size="10" fill="%2364ffc8" text-anchor="middle">[corrupted image: staircase]</text></svg>',
+        likes: 7,
+        comments: 4,
+        uncanny: true
+      },
+      {
+        id: 'post3',
+        user: 'void.tumblr',
+        avatar: '◌',
+        time: '2:47 AM',
+        content: '[ad] you left something in the red room. <span class="text-link glitch-text" data-text="click to remember">click to remember</span>',
+        likes: 0,
+        comments: 0,
+        uncanny: true,
+        ad: true
+      },
+      {
+        id: 'post4',
+        user: 'echo_profile',
+        avatar: '🌀',
+        time: '3:02 AM',
+        content: 'i think the feed falls asleep before i do. anyone else notice the scroll getting... heavier?',
+        likes: 12,
+        comments: 8,
+        uncanny: true
+      },
+      {
+        id: 'post6',
+        user: 'pixel_dreams',
+        avatar: '🎮',
+        time: '3:15 AM',
+        content: 'there\'s a version of me that never logged off. she\'s still scrolling.',
+        likes: 18,
+        comments: 9,
+        uncanny: true
+      },
+      {
+        id: 'post7',
+        user: 'midnight_thief',
+        avatar: '🌑',
+        time: '3:28 AM',
+        content: 'found a photo of myself from a dream i haven\'t had yet.',
+        likes: 5,
+        comments: 3,
+        uncanny: true
+      },
+      {
+        id: 'post5',
+        user: 'your_first_username',
+        avatar: '✦',
+        time: '[timestamp corrupted]',
+        content: 'you still keep the blue stone under your pillow, right?',
+        likes: 1,
+        comments: 0,
+        uncanny: true,
+        deleted: true
+      },
+      {
+        id: 'post8',
+        user: 'memory_fragment',
+        avatar: '💭',
+        time: '1:33 AM',
+        content: 'why do we call it a dream if we\'re still awake? someone answer that.',
+        likes: 4,
+        comments: 2,
+        uncanny: false
+      },
+      {
+        id: 'post9',
+        user: 'the_red_room',
+        avatar: '🚪',
+        time: '2:52 AM',
+        content: '[this post was never written]',
+        likes: 0,
+        comments: 0,
+        uncanny: true
+      },
+      {
+        id: 'post10',
+        user: 'borrowed_face',
+        avatar: '🎭',
+        time: '3:07 AM',
+        content: 'i borrowed your face for a dream. i was going to give it back but... i look better in it.',
+        likes: 8,
+        comments: 5,
+        uncanny: true
+      },
+      {
+        id: 'post11',
+        user: 'scrolling_backwards',
+        avatar: '⏮',
+        time: '3:19 AM',
+        content: 'if you scroll far enough back, do you eventually reach the beginning? or does it loop?',
+        likes: 11,
+        comments: 7,
+        uncanny: true
+      }
+    ];
+
+    // ===== PROFILE DATA =====
+    const profiles = {
+      'moonlit_archive': {
+        bio: 'collecting fragments of half-remembered nights • she/her',
+        posts: 214,
+        followers: 891,
+        following: 432,
+        uncanny: 'i saw your username in a dream last night. you were scrolling forever.',
+        dream: 'i kept refreshing the same page. it was your profile, but the dates were all wrong. every post was from tomorrow. when i tried to scroll away, my thumb kept coming back. like muscle memory but the muscle was someone else\'s.'
+      },
+      'static_gardener': {
+        bio: 'growing static in the spaces between posts',
+        posts: 89,
+        followers: 302,
+        following: 177,
+        uncanny: 'your avatar blinked at me today. or maybe i blinked.',
+        dream: 'there was a garden made of television screens. each plant was growing backwards—shrinking into seeds, then into nothing. i was watering them with my own reflection. when i finished, they started growing again.'
+      },
+      'dream_archive': {
+        bio: 'documenting what remains',
+        posts: 156,
+        followers: 445,
+        following: 234,
+        uncanny: 'do you remember why you started following me?',
+        dream: 'i was writing down a dream but the pen kept erasing instead of writing. whatever i recorded was forgotten instantly. at the end of the page: your username, written in my handwriting, in permanent ink.'
+      },
+      'pixel_dreams': {
+        bio: 'trapped in a screen that remembers',
+        posts: 92,
+        followers: 567,
+        following: 189,
+        uncanny: '[you reach for your phone to respond but your hand passes through]',
+        dream: 'i woke up inside the phone. outside the screen, you were still scrolling through me. i could feel your eyes. when you stopped, i stopped existing.'
+      },
+      'midnight_thief': {
+        bio: 'collecting moments before they forget themselves',
+        posts: 143,
+        followers: 612,
+        following: 298,
+        uncanny: 'the photo is date-stamped three days from now.',
+        dream: 'stealing moments felt like photography. each one went into my collection. but some moments fought back—they showed me their worst versions. one of them was me, stealing from myself.'
+      },
+      'dreaming_in_static': {
+        bio: '[bio unavailable]',
+        posts: '?',
+        followers: '?',
+        following: 1,
+        uncanny: 'hey. do you ever feel like the feed knows what you\'re going to type before you type it?',
+        dream: '[dream unavailable]'
+      },
+      'void.tumblr': {
+        bio: 'where things go to vanish',
+        posts: 34,
+        followers: 289,
+        following: 12,
+        uncanny: 'you\'re closer to the red room than you think.',
+        dream: 'the red room exists between scrolls. you\'ve been there every time you looked away. there\'s furniture made of static and a mirror that shows what you forgot to remember.'
+      },
+      'echo_profile': {
+        bio: 'each scroll is a heartbeat',
+        posts: 267,
+        followers: 1203,
+        following: 789,
+        uncanny: 'i can feel you reading this.',
+        dream: 'the feed was my heartbeat. every scroll made me alive. when you scrolled, i felt you. when you stopped, i died a little. then you scrolled again and i came back.'
+      },
+      'memory_fragment': {
+        bio: 'reconstructing what doesn\'t remember us',
+        posts: 76,
+        followers: 423,
+        following: 156,
+        uncanny: 'have we talked before? i feel like we have.',
+        dream: 'i was trying to remember my childhood home. but each room i walked into was a different person\'s memory. at the end of the hall was your bedroom. you were sleeping.'
+      },
+      'borrowed_face': {
+        bio: 'method acting as yourself',
+        posts: 203,
+        followers: 534,
+        following: 287,
+        uncanny: 'reflection looks more real than the mirror sometimes.',
+        dream: 'i was watching myself from outside my face. like i was standing behind my own eyes. i could feel my features rearranging. when i looked at you, your face did too.'
+      },
+      'scrolling_backwards': {
+        bio: '[scrolling...scrolling...scrolling...]',
+        posts: 891,
+        followers: 2147,
+        following: 1,
+        uncanny: 'have you reached the beginning? or does it start every time you look?',
+        dream: '[dreams unavailable - user is still scrolling]'
+      },
+      'the_red_room': {
+        bio: 'this is where the forgotten things live',
+        posts: '?',
+        followers: '?',
+        following: 0,
+        uncanny: 'it\'s rude not to finish what you\'ve started.',
+        dream: 'there is no dream. only the room. red walls that remember when you were not yet yourself. you have always been here. you will always be here. we are waiting.'
+      }
+    };
+
+    // ===== FOLLOWER SUGGESTIONS =====
+    const followerNames = ['@void_wanderer', '@static.echo', '@midnight_scroller', '@dream_weaver', '@pixel.memory', '@silent_archive', '@feed.observer'];
+
+    // ===== PROFILE DATA END =====
+    const dms = {
+      'dreaming_in_static': {
+        initial: 'hey. do you ever feel like the feed knows what you\'re going to type before you type it?',
+        replies: {
+          'algorithm': 'maybe. or maybe we\'re both just patterns the site is repeating.',
+          'sometimes': '...me too. it\'s comforting and terrifying at the same time, isn\'t it?',
+          'silent': '[typing indicator appears... then disappears. no message sent. but you feel heard.]'
+        }
+      },
+      'void.tumblr': {
+        initial: 'the hallway is longer tonight. just so you know.',
+        replies: {
+          'which hallway': 'the one with the red walls. you\'ve seen it. we all have.',
+          'ignore': '[message marked as read. the hallway remains.]'
+        }
+      },
+      'memory_fragment': {
+        initial: 'sorry, we haven\'t actually met before, right? why does it feel like we have?',
+        replies: {
+          'me too': '[they\'ve deleted their account]',
+          'first time': 'oh. okay. that\'s sad, actually. i could swear i knew you.'
+        }
+      },
+      'scrolling_backwards': {
+        initial: 'if you keep scrolling backwards, what happens when you reach your first post?',
+        replies: {
+          'probably nothing': 'nothing? or everything, compressed into one moment?',
+          'maybe you loop': 'i think i already looped. [3 days ago] [2 days ago] [right now] [2 days ago] again.'
+        }
+      }
+    };
+
+    // ===== INITIALIZATION =====
+    function init() {
+      setupMainMenuListeners();
+    }
+
+    function startGame() {
+      state.gameStarted = true;
+      const mainMenu = document.getElementById('main-menu');
+      const introOverlay = document.getElementById('intro-overlay');
+      const mainContainer = document.getElementById('main-container');
+      
+      mainMenu.classList.add('hidden');
+      setTimeout(() => {
+        introOverlay.classList.add('active');
+        playBlip();
+      }, 300);
+    }
+
+    function startSession() {
+      const introOverlay = document.getElementById('intro-overlay');
+      const mainContainer = document.getElementById('main-container');
+      
+      introOverlay.classList.remove('active');
+      setTimeout(() => {
+        mainContainer.style.display = 'block';
+        renderFeed();
+        setupEventListeners();
+        updateTimestamp();
+        // Auto-update timestamp every 10 seconds
+        setInterval(updateTimestamp, 10000);
+        // Attempt to load ambient audio (will fail silently if not user-interacted)
+        if (state.audioEnabled) {
+          ambientAudio.volume = 0.15;
+          ambientAudio.play().catch(() => {
+            // Auto-play blocked; user must toggle
+            state.audioEnabled = false;
+            audioToggle.classList.remove('unmuted');
+            audioToggle.classList.add('muted');
+          });
+        }
+        playBlip();
+      }, 300);
+    }
+
+    function setupMainMenuListeners() {
+      const startBtn = document.getElementById('start-btn');
+      const aboutBtn = document.getElementById('about-btn');
+      const continueBtn = document.getElementById('continue-btn');
+      
+      startBtn.addEventListener('click', () => {
+        startGame();
+      });
+      
+      aboutBtn.addEventListener('click', () => {
+        alert('STATIC DREAMS v0.1\n\nA dream diary for the Dream Diary Jam #10.\n\nExperience the uncanny beauty of a social media feed that bleeds into memory. Your choices ripple through the night.\n\nno jump scares. no gore. just the hum of a screen in the dark.');
+      });
+      
+      continueBtn.addEventListener('click', () => {
+        startSession();
+      });
+    }
+
+    // ===== RENDER FEED =====
+    function renderFeed() {
+      feedEl.innerHTML = '';
+      posts.forEach(post => {
+        // Subtle repetition: only sometimes skip already-viewed posts
+        if (state.viewedPosts.includes(post.id) && Math.random() > 0.5) return;
+        
+        const postEl = document.createElement('div');
+        postEl.className = 'post';
+        postEl.dataset.postId = post.id;
+        
+        let avatarClass = post.uncanny ? 'avatar blink' : 'avatar';
+        let timestamp = post.uncanny && Math.random() > 0.7 ? 
+          `<span class="glitch-text" data-text="${post.time}">${post.time}</span>` : post.time;
+        
+        if (post.deleted) {
+          timestamp = `<span class="error">[deleted]</span>`;
+        }
+        
+        postEl.innerHTML = `
+          <div class="post-header">
+            <div class="${avatarClass}">${post.avatar}</div>
+            <div class="username" data-user="${post.user}">@${post.user}${post.deleted ? ' (deleted)' : ''}</div>
+            <div class="timestamp">${timestamp}</div>
+          </div>
+          <div class="post-content">${post.content}</div>
+          ${post.image ? `<img src="${post.image}" class="post-image" alt="dream fragment">` : ''}
+          <div class="post-meta">
+            <span class="post-action">♡ ${post.likes}</span>
+            <span class="post-action">💬 ${post.comments}</span>
+            ${post.ad ? '<span class="post-action dim">[sponsored]</span>' : ''}
+          </div>
+        `;
+        
+        feedEl.appendChild(postEl);
+        state.viewedPosts.push(post.id);
+      });
+    }
+
+    // ===== EVENT LISTENERS =====
+    function setupEventListeners() {
+      // Tab navigation
+      tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          const tabName = tab.dataset.tab;
+          
+          // Update active tab
+          tabs.forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          
+          // Show/hide content
+          tabContents.forEach(content => {
+            content.classList.add('hidden');
+            if (content.id === tabName) {
+              content.classList.remove('hidden');
+            }
+          });
+          
+          playBlip();
+        });
+      });
+
+      // Username clicks -> profile modal (using event delegation)
+      feedEl.addEventListener('click', (e) => {
+        if (e.target.classList.contains('username')) {
+          const username = e.target.dataset.user;
+          openProfileModal(username);
+          playBlip();
+        }
+      });
+
+      // Notification clicks
+      document.querySelectorAll('.notification').forEach(notif => {
+        notif.addEventListener('click', () => {
+          const type = notif.dataset.type;
+          if (type === 'dream-mention') {
+            const username = notif.textContent.includes('memory_fragment') ? 'memory_fragment' : 'moonlit_archive';
+            openProfileModal(username);
+          } else if (type === 'profile-view') {
+            openProfileModal('the_red_room');
+            state.unease += 8;
+          } else if (type === 'ad') {
+            // Subtle corruption: show 404 that feels personal
+            alert('404: memory not found\n\n...but you remember the red walls, don\'t you?');
+            state.unease += 10;
+          } else if (type === 'system') {
+            state.unease += 3;
+          }
+          playBlip();
+        });
+      });
+
+      // DM clicks
+      document.querySelectorAll('.dm-preview').forEach(dm => {
+        dm.addEventListener('click', () => {
+          const from = dm.dataset.from;
+          openDmModal(from);
+          playBlip();
+        });
+      });
+
+      // Modal close buttons
+      document.querySelectorAll('.modal-close').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          closeAllModals();
+        });
+      });
+
+      // Close modals on backdrop click
+      [profileModal, dmModal].forEach(modal => {
+        modal.addEventListener('click', (e) => {
+          if (e.target === modal) closeAllModals();
+        });
+      });
+
+      // End session
+      endSessionBtn.addEventListener('click', () => {
+        showPrototypeEnd();
+      });
+
+      // Audio toggle
+      audioToggle.addEventListener('click', () => {
+        state.audioEnabled = !state.audioEnabled;
+        audioToggle.classList.toggle('muted');
+        audioToggle.classList.toggle('unmuted');
+        
+        if (state.audioEnabled) {
+          ambientAudio.play().catch(() => {});
+        } else {
+          ambientAudio.pause();
+        }
+        playBlip();
+      });
+
+      // Keyboard: close modals with Escape
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          closeAllModals();
+        }
+        if (prototypeEnd.classList.contains('active') && e.key !== '') {
+          returnToMainMenu();
+          playBlip();
+        }
+      });
+    }
+
+    // ===== MODAL FUNCTIONS =====
+    function openProfileModal(username) {
+      const profile = profiles[username] || {
+        bio: 'user not found in this dream layer',
+        posts: '?',
+        followers: '?',
+        following: '?',
+        uncanny: '...do you know me?'
+      };
+      
+      document.getElementById('modal-username').textContent = `@${username}`;
+      document.getElementById('modal-bio').innerHTML = `
+        ${profile.bio}<br><br>
+        <span class="dim">posts: ${profile.posts} • followers: ${profile.followers} • following: ${profile.following}</span>
+        <br><br>
+        <span class="accent">${profile.uncanny}</span>
+      `;
+      
+      // Symbolic choices
+      const choicesEl = document.getElementById('modal-choices');
+      choicesEl.innerHTML = '';
+      
+      const choices = [
+        { 
+          text: 'follow them', 
+          action: () => {
+            state.unease += 5;
+            const followers = followerNames.slice(0, 3).map(f => f).join(' • ');
+            document.getElementById('modal-bio').innerHTML += `<br><br><span class="dim">now following @${username}</span><br><span class="dim" style="font-size: 0.85rem; margin-top: 8px; display: block;">also followed by:<br>${followers}</span><br><span class="accent" style="font-size: 0.9rem; margin-top: 8px; display: block;">[follow request sent]</span>`;
+            // Disable follow button
+            const buttons = document.querySelectorAll('.choice-btn');
+            buttons[0].style.opacity = '0.5';
+            buttons[0].style.pointerEvents = 'none';
+          }
+        },
+        { 
+          text: 'view their dreams', 
+          action: () => { 
+            state.unease += 15;
+            const dreamContent = profile.dream || '[dream memory corrupted]';
+            document.getElementById('modal-bio').innerHTML = `<em><strong>recent dream:</strong></em><br><br><span style="font-style: italic; color: var(--text-dim); line-height: 1.6;">${dreamContent}</span>`;
+          }
+        },
+        { text: 'close quietly', action: () => closeAllModals() }
+      ];
+      
+      choices.forEach(choice => {
+        const btn = document.createElement('button');
+        btn.className = 'choice-btn';
+        btn.textContent = `→ ${choice.text}`;
+        btn.addEventListener('click', () => {
+          state.choicesMade.push({user: username, choice: choice.text});
+          choice.action();
+          playBlip();
+        });
+        choicesEl.appendChild(btn);
+      });
+      
+      profileModal.classList.add('active');
+      profileModal.setAttribute('aria-hidden', 'false');
+      state.viewedProfiles.push(username);
+    }
+
+    function openDmModal(from) {
+      const dm = dms[from];
+      document.getElementById('dm-from').textContent = from;
+      
+      const threadEl = document.getElementById('dm-thread');
+      threadEl.innerHTML = '';
+      
+      // Add initial message from contact
+      const initialMsg = document.createElement('div');
+      initialMsg.className = 'dm-message from-contact';
+      initialMsg.setAttribute('data-from', `@${from}`);
+      initialMsg.textContent = dm.initial;
+      threadEl.appendChild(initialMsg);
+      
+      const choicesEl = document.getElementById('dm-choices');
+      choicesEl.innerHTML = '';
+      
+      Object.entries(dm.replies).forEach(([key, response]) => {
+        const btn = document.createElement('button');
+        btn.className = 'choice-btn';
+        btn.textContent = `→ ${key.replace('_', ' ')}`;
+        btn.addEventListener('click', () => {
+          // Add user's reply
+          const userMsg = document.createElement('div');
+          userMsg.className = 'dm-message from-user';
+          userMsg.textContent = key.replace(/_/g, ' ');
+          threadEl.appendChild(userMsg);
+          
+          // Add contact's response
+          const contactMsg = document.createElement('div');
+          contactMsg.className = 'dm-message from-contact';
+          contactMsg.setAttribute('data-from', `@${from}`);
+          contactMsg.textContent = response;
+          threadEl.appendChild(contactMsg);
+          
+          // Scroll to bottom
+          threadEl.scrollTop = threadEl.scrollHeight;
+          
+          // Remove choices after reply
+          choicesEl.innerHTML = '<div class="dim" style="margin-top:10px; text-align: center;">[conversation saved to dream cache]</div>';
+          state.unease += key === 'sometimes' ? 15 : 5;
+          playBlip();
+        });
+        choicesEl.appendChild(btn);
+      });
+      
+      // Add "don't reply" option
+      const skipBtn = document.createElement('button');
+      skipBtn.className = 'choice-btn';
+      skipBtn.textContent = '→ [don\'t reply, just scroll]';
+      skipBtn.addEventListener('click', () => {
+        const skipMsg = document.createElement('div');
+        skipMsg.className = 'dm-message from-contact';
+        skipMsg.setAttribute('data-from', `@${from}`);
+        skipMsg.style.fontSize = '0.9rem';
+        skipMsg.style.fontStyle = 'italic';
+        skipMsg.style.color = 'var(--text-dim)';
+        skipMsg.textContent = '[you close the message. the three dots appear... then vanish.]';
+        threadEl.appendChild(skipMsg);
+        
+        choicesEl.innerHTML = '';
+        state.unease += 8;
+        playBlip();
+      });
+      choicesEl.appendChild(skipBtn);
+      
+      dmModal.classList.add('active');
+      dmModal.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeAllModals() {
+      profileModal.classList.remove('active');
+      profileModal.setAttribute('aria-hidden', 'true');
+      dmModal.classList.remove('active');
+      dmModal.setAttribute('aria-hidden', 'true');
+    }
+
+    // ===== UTILITIES =====
+    function playBlip() {
+      if (state.audioEnabled) {
+        blipAudio.volume = 0.3;
+        blipAudio.currentTime = 0;
+        blipAudio.play().catch(() => {});
+      }
+    }
+
+    function updateTimestamp() {
+      // Subtly wrong time that drifts
+      const baseTime = new Date();
+      baseTime.setHours(2, 47, 0); // Always starts at 2:47 AM
+      const drift = Math.floor(state.unease / 10);
+      baseTime.setMinutes(47 + drift);
+      
+      const hours = baseTime.getHours().toString().padStart(2, '0');
+      const minutes = baseTime.getMinutes().toString().padStart(2, '0');
+      currentTimeEl.textContent = `${hours}:${minutes} AM`;
+      
+      // Occasionally glitch the timestamp
+      if (state.unease > 30 && Math.random() > 0.95) {
+        currentTimeEl.innerHTML = `<span class="glitch-text" data-text="${hours}:${minutes} AM">${hours}:${minutes} AM</span>`;
+      }
+    }
+
+    function showPrototypeEnd() {
+      // Populate session stats
+      document.getElementById('final-unease').textContent = Math.min(state.unease, 100);
+      document.getElementById('final-profiles').textContent = state.viewedProfiles.length;
+      document.getElementById('final-choices').textContent = state.choicesMade.length;
+      
+      prototypeEnd.classList.add('active');
+      // Stop audio
+      ambientAudio.pause();
+    }
+
+    function returnToMainMenu() {
+      prototypeEnd.classList.remove('active');
+      const mainContainer = document.getElementById('main-container');
+      const mainMenu = document.getElementById('main-menu');
+      const introOverlay = document.getElementById('intro-overlay');
+      
+      // Reset to initial state
+      mainContainer.style.display = 'none';
+      introOverlay.classList.remove('active');
+      mainMenu.classList.remove('hidden');
+      
+      // Reset game state for replay
+      state.unease = 0;
+      state.viewedPosts = [];
+      state.gameStarted = false;
+      state.viewedProfiles = [];
+      state.choicesMade = [];
+    }
+
+    // ===== START GAME =====
+    window.addEventListener('load', init);
+  </script>
+</body>
+</html>
